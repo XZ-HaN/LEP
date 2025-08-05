@@ -12,28 +12,28 @@ import matplotlib.pyplot as plt
 from typing import List, Dict, Tuple, Union, Optional
 
 
-# ==================== ✅ 配置部分（用户可修改） ====================
+# ==================== ✅ Configuration Section (User Modifiable) ====================
 class Config:
-    # 结构分析参数
+    # Structural analysis parameters
     ELEMENT_LIST = ['Ti', 'Al', 'Nb', 'Mo', 'Zr']
     LATTICE_CONSTANT = 3.31
-    NEIGHBOR_LAYERS = 6  # 邻域分析层数上限
+    NEIGHBOR_LAYERS = 6  # Max neighbor layers to analyze
 
-    # 神经网络参数
-    HIDDEN_SIZES = [500, 500, 500]  # 隐藏层结构
-    ACTIVATION = 'relu'      # 激活函数
-    DROPOUT_RATE = 0.0       # Dropout比例
+    # Neural network parameters
+    HIDDEN_SIZES = [500, 500, 500]  # Hidden layer structure
+    ACTIVATION = 'relu'      # Activation function
+    DROPOUT_RATE = 0.0       # Dropout rate
 
-    # 训练参数
+    # Training parameters
     TRAIN_RATIO = 0.8
     BATCH_SIZE = 16
     LR = 0.0005
-    LOSS_FN = 'mse'          # 损失函数类型
-    OPTIMIZER = 'adam'       # 优化器类型
-    SCHEDULER = 'step_lr'    # 学习率调度器
-    DEVICE = 'cuda'          # 使用设备 (cuda 或 cpu)
+    LOSS_FN = 'mse'          # Loss function type
+    OPTIMIZER = 'adam'       # Optimizer type
+    SCHEDULER = 'step_lr'    # Learning rate scheduler
+    DEVICE = 'cuda'          # Device (cuda or cpu)
 
-    # 其他配置
+    # Other configurations
     MAX_EPOCHS = 100
     VERBOSE_TRAIN = True
     
@@ -75,7 +75,7 @@ class StructureAnalyzer:
 
     @property
     def input_dim(self):
-        """自动计算输入维度：(层数 + 1) * 元素种类"""
+        """Automatically calculate input dimension: (layers + 1) * element types"""
         return (self.n_layers + 1) * len(self.element_list)
 
     def _get_periodic_images(self, positions, cell, PBC_layers=2):
@@ -137,7 +137,7 @@ class NNmodel(nn.Module):
         activation: str,
         dropout_rate: float,
         output_size: int = 1,
-        per_atom_output: bool = True  # 新增原子级输出标志
+        per_atom_output: bool = True
     ):
         super().__init__()
         self.activations = {
@@ -147,7 +147,7 @@ class NNmodel(nn.Module):
         }
         self.activation_fn = self.activations[activation.lower()]
         self.dropout = nn.Dropout(dropout_rate)
-        self.per_atom_output = per_atom_output  # 保存输出模式
+        self.per_atom_output = per_atom_output
 
         layers = []
         prev_size = input_size
@@ -163,14 +163,11 @@ class NNmodel(nn.Module):
         max_length = x.size(1)
         mask = torch.arange(max_length).expand(len(lengths), max_length).to(x.device) < lengths.unsqueeze(1)
         
-        # 前向传播
         x = self.fc(x)
         
         if self.per_atom_output:
-            # 原子级能量输出 [batch_size, max_atoms]
             return x.squeeze(-1) * mask.float()
         else:
-            # 总能量输出（原始模式）
             x = x * mask.unsqueeze(2)
             return x.sum(1)
     
@@ -263,15 +260,13 @@ class EnergyTrainer:
             y = y.to(self.device)
 
             self.optimizer.zero_grad()
-            outputs = self.model(x_padded, lengths)  # 加和
+            outputs = self.model(x_padded, lengths)
             if self.model.per_atom_output:
-                # 原子级输出：先求和再平均
                 total_energies = outputs.sum(dim=1)
                 average_outputs = total_energies / lengths.float()
             else:
-                # 原始模式：直接是总能量
                 average_outputs = outputs.squeeze() / lengths.float()
-            loss = self.loss_fn(average_outputs.squeeze(), y)  # 用平均值计算损失
+            loss = self.loss_fn(average_outputs.squeeze(), y)
             loss.backward()
             self.optimizer.step()
             total_loss += loss.item()
@@ -293,15 +288,13 @@ class EnergyTrainer:
                 x_padded = torch.stack([self._pad_sequence(seq, max_len) for seq in x]).to(self.device)
                 y = y.to(self.device)
 
-                outputs = self.model(x_padded, lengths)  # 加和
+                outputs = self.model(x_padded, lengths)
                 if self.model.per_atom_output:
-                    # 原子级输出：先求和再平均
                     total_energies = outputs.sum(dim=1)
                     average_outputs = total_energies / lengths.float()
                 else:
-                    # 原始模式：直接是总能量
                     average_outputs = outputs.squeeze() / lengths.float()
-                loss = self.loss_fn(average_outputs.squeeze(), y)  # 用平均值计算损失
+                loss = self.loss_fn(average_outputs.squeeze(), y)
                 total_loss += loss.item()
 
         if self.scheduler and isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
@@ -355,16 +348,14 @@ class EnergyTrainer:
                 x_padded = torch.stack([self._pad_sequence(seq, max_len) for seq in x]).to(self.device)
                 y = y.to(self.device)
 
-                outputs = self.model(x_padded, lengths)  # 加和
+                outputs = self.model(x_padded, lengths)
                 if self.model.per_atom_output:
-                    # 原子级输出：先求和再平均
                     total_energies = outputs.sum(dim=1)
                     average_outputs = total_energies / lengths.float()
                 else:
-                    # 原始模式：直接是总能量
                     average_outputs = outputs.squeeze() / lengths.float()
                 actual.extend(y.cpu().numpy())
-                predicted.extend(average_outputs.squeeze().cpu().numpy())  # 用平均值进行评估
+                predicted.extend(average_outputs.squeeze().cpu().numpy())
 
         return np.array(actual), np.array(predicted)
     
@@ -385,7 +376,6 @@ class EnergyTrainer:
         plt.show()
         
     def evaluate_val(self):
-
         self.model.eval()
         actual, predicted = [], []
 
@@ -397,16 +387,14 @@ class EnergyTrainer:
                 x_padded = torch.stack([self._pad_sequence(seq, max_len) for seq in x]).to(self.device)
                 y = y.to(self.device)
 
-                outputs = self.model(x_padded, lengths)  # 加和
+                outputs = self.model(x_padded, lengths)
                 if self.model.per_atom_output:
-                    # 原子级输出：先求和再平均
                     total_energies = outputs.sum(dim=1)
                     average_outputs = total_energies / lengths.float()
                 else:
-                    # 原始模式：直接是总能量
                     average_outputs = outputs.squeeze() / lengths.float()
                 actual.extend(y.cpu().numpy())
-                predicted.extend(average_outputs.squeeze().cpu().numpy())  # 用平均值进行评估
+                predicted.extend(average_outputs.squeeze().cpu().numpy())
         
         actual, predicted = np.array(actual), np.array(predicted)
 
@@ -424,4 +412,3 @@ class EnergyTrainer:
         plt.xlabel('DFT Energy (eV/atom)')
         plt.ylabel('Predicted Energy (eV/atom)')
         plt.show()
-        
