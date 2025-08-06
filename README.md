@@ -4,7 +4,7 @@
 [![PyTorch Version](https://img.shields.io/badge/PyTorch-2.0%2B-orange.svg)](https://pytorch.org/get-started/locally/)
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
-Official implementation of the LEP (Learning Enhanced Project) framework.
+
 
 ## Installation
 
