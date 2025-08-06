@@ -2,7 +2,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch Version](https://img.shields.io/badge/PyTorch-2.0%2B-orange.svg)](https://pytorch.org/get-started/locally/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-GPL-3-green.svg)](LICENSE)
 
 Official implementation of the LEP (Learning Enhanced Project) framework.
 
