@@ -14,44 +14,53 @@
 - CUDA Toolkit (compatible with your PyTorch version)
 
 ### Step 1: Create Conda Environment
-bash
+```bash
 conda create -n lep_env python=3.9  # Python 3.8 or 3.9 recommended
 conda activate lep_env
+```
 
 
 ### Step 2: Install PyTorch
 Select the appropriate command from [PyTorch's official installation guide](https://pytorch.org/get-started/locally/) based on your hardware configuration:
 
 #### For CUDA 12.x (NVIDIA GPU):
-bash
+```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
 
 
 #### For CPU-only systems:
-bash
+```bash
 pip3 install torch torchvision torchaudio
+```
 
 
 ### Step 3: Install LEP Package
-bash
+```bash
 git clone https://github.com/XZ-HaN/LEP.git
 cd LEP
+```
 
 Install package and dependencies
 
+```bash
 python setup.py install
+```
 
 For development mode (recommended)
 
+```bash
 pip install -e .[dev]  # Installs with development extras
+```
 
 
 ## Verification
 Confirm successful installation with:
-python
+```python
 import lep
 import torch
 
 print(f"LEP version: {lep.__version__}")
 print(f"PyTorch version: {torch.__version__}")
 print(f"CUDA available: {torch.cuda.is_available()}")
+```
