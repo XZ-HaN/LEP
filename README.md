@@ -47,10 +47,10 @@ Install package and dependencies
 python setup.py install
 ```
 
-For development mode (recommended)
+Or
 
 ```bash
-pip install -e .[dev]  # Installs with development extras
+pip install -e .
 ```
 
 
