@@ -314,21 +314,25 @@ class MonteCarloSampler:
         initial_structure: Atoms,
         save_interval: int = 100,
         trajectory_file: str = 'accepted.traj',
+        resume_file = None,
         log_file: str = 'full_log.txt',
         resume: bool = False,
-        val1000 = False
+        val1000 = False,
+        annealing = False
     ) -> List[dict]:
         current_structure = initial_structure.copy()
         
         cached_loaded = False
+        if resume_file is None:
+            resume_file = trajectory_file
         if resume:
             try:
                 from ase.io import read
-                traj = Trajectory(trajectory_file, 'r')
+                traj = Trajectory(resume_file, 'r')
                 if len(traj) == 0:
                     raise ValueError("Empty trajectory file")
 
-                last_atoms = read(trajectory_file, index=-1)
+                last_atoms = read(resume_file, index=-1)
 
                 cached_loaded = self._load_cached_features_from_atoms(last_atoms)
                 if cached_loaded:
@@ -352,7 +356,7 @@ class MonteCarloSampler:
                         return -1
                 
                 start_step = get_last_step(log_file) + 1
-                if start_step < 0:
+                if start_step < 0 or annealing == True:
                     start_step = 0
             
             except Exception as e:
@@ -387,9 +391,10 @@ class MonteCarloSampler:
         k_B = 8.617e-5
         T_eV = k_B * self.temperature
 
-        write_mode = 'a' if resume else 'w'
-
-        if not resume:
+        write_mode = 'w'
+        if resume and not annealing:
+            write_mode = 'a'
+        if not resume or annealing:
             with open(log_file, 'w') as f:
                 pass
 
@@ -436,6 +441,7 @@ class MonteCarloSampler:
                 results.append(step_info)
 
                 self.save_results(step_info, output_log=log_file)
+                
 
                 if is_accepted:
                     for i, idx in enumerate(modified_indices):
@@ -449,6 +455,7 @@ class MonteCarloSampler:
                         
                         self.index_to_element[idx] = new_sym
                     current_structure = new_structure.copy()
+                    
 
                     current_energy = new_energy           
                     
@@ -456,6 +463,7 @@ class MonteCarloSampler:
                     self.cached_features = cached_features_backup
                     self.atomic_energies = atomic_energies_backup
                     self.total_energy = current_energy
+                
 
                 if step == 1000 and val1000 == True:
                     df = self.analyzer.create_atomic_environment_df(current_structure,PBC_layers=1)
@@ -467,12 +475,14 @@ class MonteCarloSampler:
                     if not torch.allclose(self.cached_features, current_features, atol=1e-8):
                         raise ValueError("Feature validation failed at step 1000")     
 
-                if (step+1) % save_interval == 0 and step != start_step:
+                if step + 1 == self.max_steps + start_step:
                     current_structure.info['energy'] = current_energy
-                    if step + 1 == self.max_steps + start_step - 1:
-                        self._save_cached_features_to_atoms(current_structure)
+                    self._save_cached_features_to_atoms(current_structure)
                     traj.write(current_structure)
-
+                elif (step+1) % save_interval == 0 and step != start_step:
+                    current_structure.info = {}
+                    current_structure.info['energy'] = current_energy
+                    traj.write(current_structure)
         return results
 
     def _save_cached_features_to_atoms(self, atoms: Atoms):
@@ -524,6 +534,10 @@ class MonteCarloSampler:
                     f"{step_info['delta_energy']:.6f}\t"
                     f"{step_info['metropolis_prob']:.6f}\t"
                     f"{int(step_info['accepted'])}\n")
+    def get_final_structure(self) -> Atoms:
+        if not hasattr(self, 'current_structure'):
+            raise RuntimeError("No structure available. Run simulation first.")
+        return self.current_structure
 
 def read_enhanced_log_file(log_file: str) -> Dict[str, np.ndarray]:
     data = defaultdict(list)
@@ -580,3 +594,4 @@ def plot_energy(log_data):
 
     plt.tight_layout()
     plt.show()
+    
