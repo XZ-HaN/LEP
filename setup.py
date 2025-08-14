@@ -18,7 +18,7 @@ setup(
     ],
     classifiers=[      
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GLP-3 License",
+        "License :: OSI Approved :: GPL-3.0 License",
     ],
     python_requires=">=3.9",      
     entry_points={            
