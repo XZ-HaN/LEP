@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="LEP",
-    version="0.1.0",             
+    version=__version__,             
     packages=find_packages(),   
     description="LEP",  
     long_description=open('README.md').read(),
