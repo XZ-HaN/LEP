@@ -15,7 +15,7 @@
 
 ### Step 1: Create Conda Environment
 ```bash
-conda create -n lep_env python=3.9  # Python 3.8 or 3.9 recommended
+conda create -n lep_env python=3.9  # Python 3.9 or 3.10 recommended
 conda activate lep_env
 ```
 
