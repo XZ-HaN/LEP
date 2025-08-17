@@ -280,6 +280,7 @@ class CanonicalEnsembleSampler(MonteCarloSampler):
             initial_structure=initial_structure,
             save_interval=save_interval,
             trajectory_file=trajectory_file,
+            resume_file = resume_file,
             log_file=log_file,
             resume=resume,
             val1000=val1000,
