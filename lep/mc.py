@@ -382,8 +382,8 @@ class MonteCarloSampler:
             
             if hasattr(self, 'atomic_energies') and self.atomic_energies is not None:
                 self.total_energy = self.atomic_energies.sum().item()
-                if abs(self.total_energy - current_energy) > 1e-4:
-                    print(f"Warning: Atomic energy ({self.total_energy:.5f}) differs from structure energy ({current_energy:.5f}), using structure energy")
+                if abs(self.total_energy - current_energy) > 1e-3:
+                    print(f"Warning: Atomic energy ({self.total_energy:.5f}eV) differs from structure energy ({current_energy:.5f}eV), using structure energy")
                     current_energy = self.total_energy
         else:
             current_energy = self.predict_energy(current_structure)
@@ -482,6 +482,11 @@ class MonteCarloSampler:
                 elif (step+1) % save_interval == 0 and step != start_step:
                     current_structure.info = {}
                     current_structure.info['energy'] = current_energy
+                    if self.atomic_energies.is_cuda:
+                        energies_array = self.atomic_energies.cpu().numpy()  # CUDA -> CPU -> NumPy
+                    else:
+                        energies_array = self.atomic_energies.numpy()
+                    current_structure.info['atomic_energies'] = energies_array
                     traj.write(current_structure)
         return results
 
@@ -514,15 +519,11 @@ class MonteCarloSampler:
             atoms.info['neighbor_table'] = serializable_table
 
         if hasattr(self, 'atomic_energies') and self.atomic_energies is not None:
-            atomic_energies_np = self.atomic_energies.cpu().numpy()
-            if atomic_energies_np.dtype == np.float64:
-                atomic_energies_np = atomic_energies_np.astype(np.float32)
-
-            compressed = zlib.compress(pickle.dumps(atomic_energies_np))
-            b64_encoded = base64.b64encode(compressed).decode('ascii')
-            atoms.info['atomic_energies_compressed'] = b64_encoded
-            atoms.info['atomic_energies_shape'] = atomic_energies_np.shape
-            atoms.info['atomic_energies_dtype'] = str(atomic_energies_np.dtype)
+            if self.atomic_energies.is_cuda:
+                energies_array = self.atomic_energies.cpu().numpy()  # CUDA -> CPU -> NumPy
+            else:
+                energies_array = self.atomic_energies.numpy()
+            atoms.info['atomic_energies'] = energies_array
             
     def save_results(self, step_info: dict, output_log: str = 'full_log.txt'):
         with open(output_log, 'a') as f:
