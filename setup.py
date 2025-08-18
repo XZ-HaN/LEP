@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from lep import __version__
 
 setup(
     name="LEP",
@@ -14,7 +15,11 @@ setup(
     install_requires=[         
         "requests>=2.25.1",    
         "numpy",
-        "matplotlib==3.7.1"
+        "matplotlib",
+        "pandas",
+        "scipy",
+        "numpy"，
+	    "ase"
     ],
     classifiers=[      
         "Programming Language :: Python :: 3",
