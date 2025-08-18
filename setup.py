@@ -12,18 +12,17 @@ setup(
     author="HaN",  
     author_email="zybaozi@sjtu.edu.cn",   
     license="GPL-3.0",   
-    install_requires=[         
-        "requests>=2.25.1",    
-        "numpy",
-        "matplotlib",
-        "pandas",
-        "scipy",
-        "numpy"，
-	    "ase"
-    ],
+	install_requires = [
+	    "numpy",
+	    "scipy",
+	    "pandas",
+	    "ase",
+	    "matplotlib",
+	    "tqdm",
+	],
     classifiers=[      
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GPL-3.0 License",
     ],
-    python_requires=">=3.9",      
+    python_requires=">=3.8",      
 )
