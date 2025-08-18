@@ -26,9 +26,4 @@ setup(
         "License :: OSI Approved :: GPL-3.0 License",
     ],
     python_requires=">=3.9",      
-    entry_points={            
-        'console_scripts': [
-            'my_command=my_package.module:main', 
-        ],
-    },
 )
