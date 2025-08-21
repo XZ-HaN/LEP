@@ -94,6 +94,7 @@ def plot_csro(df, target_marker_count=50, window_size=500):
     plt.legend(handles, labels, loc="upper right", fontsize=10, ncol=2)
     plt.grid(True)
     plt.tight_layout()
+    plt.savefig('csro.png', dpi=300)
     plt.show()
 
 def plot_csro_by_temperature(df):
@@ -165,6 +166,7 @@ def plot_csro_by_temperature(df):
     plt.legend(handles, labels, loc="upper right", fontsize=10, ncol=2)
     plt.grid(True)
     plt.tight_layout()
+    plt.savefig('csro_by_T', dpi=300)
     plt.show()
 
 def count_element_pairs(df, layers=1):
@@ -330,6 +332,8 @@ def generate_csro_table_by_temperature(base_dir, traj_keyword, analyzer, n_neigh
     """
     # Find all temperature directories
     temp_dirs = glob.glob(os.path.join(base_dir, "T_*"))
+    temp_dirs = sorted(temp_dirs, 
+                          key=lambda s: int(re.search(r'T_(\d+)', s).group(1)))
     temperature_data = []
     
     for temp_dir in temp_dirs:
