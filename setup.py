@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from lep import __version__
 
 setup(
     name="LEP",
@@ -11,19 +12,17 @@ setup(
     author="HaN",  
     author_email="zybaozi@sjtu.edu.cn",   
     license="GPL-3.0",   
-    install_requires=[         
-        "requests>=2.25.1",    
-        "numpy",
-        "matplotlib==3.7.1"
-    ],
+	install_requires = [
+	    "numpy",
+	    "scipy",
+	    "pandas",
+	    "ase",
+	    "matplotlib",
+	    "tqdm",
+	],
     classifiers=[      
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GPL-3.0 License",
     ],
-    python_requires=">=3.9",      
-    entry_points={            
-        'console_scripts': [
-            'my_command=my_package.module:main', 
-        ],
-    },
+    python_requires=">=3.8",      
 )

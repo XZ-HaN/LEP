@@ -41,18 +41,18 @@ git clone https://github.com/XZ-HaN/LEP.git
 cd LEP
 ```
 
-Install package and dependencies
+Install package and dependencies 
 
 ```bash
-python setup.py install
+pip install .
 ```
+
 
 Or
 
 ```bash
-pip install -e .
+python setup.py install
 ```
-
 
 ## Verification
 Confirm successful installation with:
